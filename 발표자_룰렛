@@ -1,0 +1,319 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>발표자 룰렛</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 교실 칠판 옆 TV에 띄우는 화면. 왼쪽 큰 룰렛, 오른쪽 명단 패널. 좁으면 세로로 쌓임 */
+:root {
+  --bg: #eef3f1;
+  --panel: #ffffff;
+  --ink: #1f2b28;
+  --muted: #5d6e69;
+  --line: #d3dfdb;
+  --accent: #1f7a5c;
+  --accent-ink: #ffffff;
+  --pin: #e2513b;
+  --s1: #f4b740; --s2: #4aa3d8; --s3: #e86f5a; --s4: #5bbf8a; --s5: #9b7fd1; --s6: #f08fb0;
+  --font-display: "Jua", "Noto Sans KR", system-ui, sans-serif;
+  --font-body: "Noto Sans KR", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14201d; --panel: #1c2a26; --ink: #e8f0ed; --muted: #9fb2ac; --line: #2f413c;
+    --accent: #4cc496; --accent-ink: #0f1a17; --pin: #ff7a62; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14201d; --panel: #1c2a26; --ink: #e8f0ed; --muted: #9fb2ac; --line: #2f413c;
+  --accent: #4cc496; --accent-ink: #0f1a17; --pin: #ff7a62; color-scheme: dark;
+}
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 32px;
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 5vw, 42px); margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+.main { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 780px) { .main { grid-template-columns: 1fr; } }
+
+.stage { display: grid; gap: 16px; justify-items: center; min-width: 0; }
+.wheel-box { position: relative; width: min(100%, 520px); aspect-ratio: 1; max-width: 100%; }
+.wheel-box canvas { width: 100%; height: 100%; display: block; }
+.pin {
+  position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent;
+  border-top: 34px solid var(--pin); filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); z-index: 2;
+}
+.hub {
+  position: absolute; inset: 50% auto auto 50%; transform: translate(-50%, -50%);
+  width: 22%; aspect-ratio: 1; border-radius: 50%; background: var(--panel);
+  border: 4px solid var(--ink); display: grid; place-items: center;
+  font-family: var(--font-display); font-size: clamp(14px, 3vw, 22px); color: var(--ink); cursor: pointer;
+}
+.hub:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.hub:disabled { cursor: default; opacity: .8; }
+
+.result {
+  min-height: 72px; display: grid; place-items: center; text-align: center;
+  font-family: var(--font-display); font-size: clamp(30px, 6vw, 52px); color: var(--accent);
+}
+.result small { display: block; font-family: var(--font-body); font-size: 14px; color: var(--muted); }
+.result.pop { animation: pop .5s ease-out; }
+@keyframes pop { 0% { transform: scale(.6); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+button { font-family: var(--font-body); font-size: 15px; cursor: pointer; }
+.btn {
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  padding: 10px 16px; border-radius: 10px; font-weight: 500;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-family: var(--font-display); font-size: 22px; padding: 12px 34px; }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0; }
+label.lbl { font-weight: 700; font-size: 14px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0; }
+textarea {
+  width: 100%; box-sizing: border-box; min-height: 180px; resize: vertical;
+  font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  background: var(--bg); color: var(--ink);
+}
+textarea:focus-visible { outline: 2px solid var(--accent); }
+.opts { display: grid; gap: 8px; }
+.opts label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.opts input { width: 18px; height: 18px; accent-color: var(--accent); }
+.count { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
+.picked { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.chip b { color: var(--accent); margin-right: 4px; }
+.empty { color: var(--muted); font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .result.pop { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>오늘의 발표자는?</h1>
+    <p class="sub">이름을 넣고 가운데를 누르거나 <b>돌리기</b>를 눌러 주세요. 스페이스바도 돼요.</p>
+  </header>
+
+  <div class="main">
+    <section class="stage" aria-label="룰렛">
+      <div class="wheel-box">
+        <div class="pin" aria-hidden="true"></div>
+        <canvas id="wheel" width="1040" height="1040" aria-hidden="true"></canvas>
+        <button class="hub" id="hub" type="button" aria-label="룰렛 돌리기">GO!</button>
+      </div>
+      <div class="result" id="result" aria-live="polite"><span><small>누가 뽑힐까요?</small>두근두근</span></div>
+      <div class="btn-row">
+        <button class="btn primary" id="spin" type="button">돌리기</button>
+        <button class="btn" id="full" type="button">전체 화면</button>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="명단 설정">
+      <h2>우리 반 명단</h2>
+      <div style="display:grid;gap:6px">
+        <label class="lbl" for="names">한 줄에 한 명씩, 또는 쉼표로 구분</label>
+        <textarea id="names" spellcheck="false"></textarea>
+        <p class="hint">처음 들어 있는 이름은 예시예요. 지우고 우리 반 이름을 넣으세요. 이 브라우저에 자동 저장됩니다.</p>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="exclude" checked> 이미 뽑힌 친구는 다시 안 나오게</label>
+        <label><input type="checkbox" id="sound" checked> 효과음</label>
+      </div>
+      <div style="display:grid;gap:8px">
+        <span class="lbl">발표한 순서</span>
+        <div class="picked" id="picked"><span class="empty">아직 없어요</span></div>
+        <div class="btn-row" style="justify-content:flex-start">
+          <button class="btn" id="reset" type="button">순서 초기화</button>
+          <button class="btn" id="shuffle" type="button">명단 섞기</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+  const SAMPLE = ["김민준","이서연","박지호","최하은","정도윤","강서윤","조예준","윤지우","장시우","임하린","한유준","오수아"];
+  const $ = id => document.getElementById(id);
+  const canvas = $("wheel"), ctx = canvas.getContext("2d");
+  const namesEl = $("names"), resultEl = $("result");
+  const store = {
+    get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  };
+
+  let picked = [];
+  try { picked = JSON.parse(store.get("roulette-picked") || "[]"); } catch(e){ picked = []; }
+  namesEl.value = store.get("roulette-names") ?? SAMPLE.join("\n");
+  $("exclude").checked = store.get("roulette-exclude") !== "0";
+  $("sound").checked = store.get("roulette-sound") !== "0";
+
+  let rotation = 0, spinning = false;
+
+  const allNames = () => namesEl.value.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+  const pool = () => {
+    const all = allNames();
+    if (!$("exclude").checked) return all;
+    const left = [...all];
+    picked.forEach(p => { const i = left.indexOf(p); if (i > -1) left.splice(i, 1); });
+    return left;
+  };
+
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  function draw() {
+    const list = pool();
+    const W = canvas.width, c = W / 2, r = c - 12;
+    ctx.clearRect(0, 0, W, W);
+    ctx.save();
+    ctx.translate(c, c);
+    ctx.rotate(rotation * Math.PI / 180);
+    const colors = ["--s1","--s2","--s3","--s4","--s5","--s6"].map(css);
+    const ink = css("--ink");
+    if (!list.length) {
+      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fillStyle = css("--line"); ctx.fill();
+    } else {
+      const seg = Math.PI * 2 / list.length;
+      list.forEach((name, i) => {
+        const a0 = -Math.PI/2 + i*seg;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,r,a0,a0+seg); ctx.closePath();
+        let col = colors[i % colors.length];
+        if (list.length % colors.length === 1 && i === list.length - 1 && i > 0) col = colors[2];
+        ctx.fillStyle = col; ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.8)"; ctx.stroke();
+        ctx.save();
+        ctx.rotate(a0 + seg/2);
+        ctx.textAlign = "right"; ctx.textBaseline = "middle";
+        const size = Math.max(22, Math.min(54, 520 / Math.max(list.length, 6) * 1.6, seg * r * 0.5));
+        ctx.font = `${size}px Jua, "Noto Sans KR", sans-serif`;
+        ctx.fillStyle = "#1f2b28";
+        let label = name.length > 8 ? name.slice(0,7) + "…" : name;
+        ctx.fillText(label, r - 28, 2);
+        ctx.restore();
+      });
+    }
+    ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.lineWidth = 10; ctx.strokeStyle = ink; ctx.stroke();
+    ctx.restore();
+    const n = allNames().length, left = list.length;
+    $("count").textContent = $("exclude").checked ? `전체 ${n}명 · 남은 친구 ${left}명` : `전체 ${n}명`;
+    $("spin").disabled = $("hub").disabled = spinning || left === 0;
+  }
+
+  function renderPicked() {
+    const box = $("picked");
+    box.innerHTML = "";
+    if (!picked.length) { box.innerHTML = '<span class="empty">아직 없어요</span>'; return; }
+    picked.forEach((p, i) => {
+      const s = document.createElement("span");
+      s.className = "chip";
+      s.innerHTML = `<b>${i+1}</b>`;
+      s.append(p);
+      box.append(s);
+    });
+  }
+
+  let audio;
+  function tick(freq = 900, dur = 0.03, vol = 0.15) {
+    if (!$("sound").checked) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = freq; o.type = "triangle";
+      g.gain.setValueAtTime(vol, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + dur);
+      o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime + dur);
+    } catch(e){}
+  }
+  function fanfare() { [660, 880, 1100].forEach((f, i) => setTimeout(() => tick(f, .18, .2), i * 120)); }
+
+  function spin() {
+    const list = pool();
+    if (spinning || !list.length) return;
+    spinning = true; draw();
+    resultEl.classList.remove("pop");
+    resultEl.innerHTML = "<span><small>돌아가는 중…</small>두근두근</span>";
+    const winner = Math.floor(Math.random() * list.length);
+    const seg = 360 / list.length;
+    const center = (winner + 0.5) * seg + (Math.random() - 0.5) * seg * 0.7;
+    const start = rotation;
+    const base = ((-center - start) % 360 + 360) % 360;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const end = start + base + 360 * (reduce ? 1 : 6);
+    const dur = reduce ? 600 : 5200;
+    const t0 = performance.now();
+    let lastSeg = Math.floor(((start % 360) + 360) % 360 / seg);
+    const ease = t => 1 - Math.pow(1 - t, 4);
+    function frame(now) {
+      const t = Math.min(1, (now - t0) / dur);
+      rotation = start + (end - start) * ease(t);
+      const s = Math.floor(((rotation % 360) + 360) % 360 / seg);
+      if (s !== lastSeg) { tick(); lastSeg = s; }
+      draw();
+      if (t < 1) requestAnimationFrame(frame);
+      else finish(list[winner]);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function finish(name) {
+    spinning = false;
+    rotation = rotation % 360;
+    picked.push(name);
+    store.set("roulette-picked", JSON.stringify(picked));
+    resultEl.innerHTML = "";
+    const span = document.createElement("span");
+    span.innerHTML = `<small>${picked.length}번째 발표자</small>`;
+    span.append(name + " 🎉");
+    resultEl.append(span);
+    void resultEl.offsetWidth;
+    resultEl.classList.add("pop");
+    fanfare();
+    renderPicked(); draw();
+  }
+
+  $("spin").addEventListener("click", spin);
+  $("hub").addEventListener("click", spin);
+  document.addEventListener("keydown", e => {
+    if (e.code === "Space" && document.activeElement !== namesEl && !(document.activeElement instanceof HTMLInputElement)) {
+      e.preventDefault(); spin();
+    }
+  });
+  namesEl.addEventListener("input", () => { store.set("roulette-names", namesEl.value); if (!spinning) draw(); });
+  $("exclude").addEventListener("change", e => { store.set("roulette-exclude", e.target.checked ? "1" : "0"); draw(); });
+  $("sound").addEventListener("change", e => store.set("roulette-sound", e.target.checked ? "1" : "0"));
+  $("reset").addEventListener("click", () => {
+    picked = []; store.set("roulette-picked", "[]"); renderPicked();
+    resultEl.innerHTML = "<span><small>누가 뽑힐까요?</small>두근두근</span>"; draw();
+  });
+  $("shuffle").addEventListener("click", () => {
+    if (spinning) return;
+    const a = allNames();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    namesEl.value = a.join("\n"); store.set("roulette-names", namesEl.value); draw();
+  });
+  $("full").addEventListener("click", () => {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(() => {});
+    } catch(e){}
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", draw);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts) document.fonts.ready.then(draw);
+
+  renderPicked(); draw();
+})();
+</script>
+
+</body></html>
