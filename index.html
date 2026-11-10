@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>발표자 룰렛</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root {
+  --bg: #eef3f1; --panel: #ffffff; --ink: #1f2b28; --muted: #5d6e69; --line: #d3dfdb;
+  --accent: #1f7a5c; --accent-ink: #ffffff; --pin: #e2513b;
+  --s1: #f4b740; --s2: #4aa3d8; --s3: #e86f5a; --s4: #5bbf8a; --s5: #9b7fd1; --s6: #f08fb0;
+  --font-display: "Jua", "Noto Sans KR", system-ui, sans-serif;
+  --font-body: "Noto Sans KR", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #14201d; --panel: #1c2a26; --ink: #e8f0ed; --muted: #9fb2ac; --line: #2f413c;
+    --accent: #4cc496; --accent-ink: #0f1a17; --pin: #ff7a62; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 16px; line-height: 1.7;
+  padding: 40px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+.wrap { max-width: 880px; margin: 0 auto; display: grid; gap: 40px; }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+@media (max-width: 680px) { .hero { grid-template-columns: 1fr; } .mini { max-width: 240px; margin: 0 auto; } }
+.eyebrow { color: var(--accent); font-weight: 700; font-size: 14px; letter-spacing: .04em; margin: 0 0 6px; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 7vw, 60px); line-height: 1.15; margin: 0 0 14px; text-wrap: balance; }
+.lead { color: var(--muted); font-size: 18px; margin: 0 0 24px; max-width: 32em; }
+.cta {
+  display: inline-block; background: var(--accent); color: var(--accent-ink); text-decoration: none;
+  font-family: var(--font-display); font-size: 24px; padding: 12px 36px; border-radius: 12px;
+}
+.cta:hover { filter: brightness(1.08); }
+.cta:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.mini { position: relative; width: 100%; aspect-ratio: 1; }
+.mini .disc {
+  position: absolute; inset: 0; border-radius: 50%; border: 8px solid var(--ink);
+  background: conic-gradient(var(--s1) 0 60deg, var(--s2) 0 120deg, var(--s3) 0 180deg,
+    var(--s4) 0 240deg, var(--s5) 0 300deg, var(--s6) 0 360deg);
+  animation: turn 14s linear infinite;
+}
+.mini .hub { position: absolute; inset: 39%; border-radius: 50%; background: var(--panel); border: 4px solid var(--ink); }
+.mini .pin { position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+  border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 30px solid var(--pin); }
+@keyframes turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mini .disc { animation: none; } }
+
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 28px; margin: 0 0 16px; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.feature { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+.feature h3 { margin: 0 0 4px; font-size: 17px; }
+.feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+.steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; counter-increment: s; }
+.steps li::before {
+  content: counter(s); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--font-display); font-size: 20px;
+}
+.steps b { display: block; }
+.steps span { color: var(--muted); font-size: 15px; }
+kbd { font-family: var(--font-body); font-size: 13px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; background: var(--panel); }
+
+footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">교실 수업 도구</p>
+      <h1>오늘의 발표자, 룰렛이 정해요</h1>
+      <p class="lead">우리 반 이름을 넣고 돌리기만 하면 발표할 친구가 공정하게 뽑혀요. 이미 발표한 친구는 빠지니까 모두에게 차례가 돌아갑니다.</p>
+      <a class="cta" href="roulette.html">룰렛 열기</a>
+    </div>
+    <div class="mini" aria-hidden="true">
+      <div class="disc"></div>
+      <div class="hub"></div>
+      <div class="pin"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>이런 걸 할 수 있어요</h2>
+    <div class="features">
+      <div class="feature"><h3>공정한 무작위 뽑기</h3><p>룰렛이 멈추는 자리는 매번 무작위로 정해져요.</p></div>
+      <div class="feature"><h3>중복 없이 한 바퀴</h3><p>뽑힌 친구는 자동으로 빠지고, 발표한 순서가 기록돼요.</p></div>
+      <div class="feature"><h3>명단 자동 저장</h3><p>한 번 입력한 명단은 같은 컴퓨터에서 다시 열어도 남아 있어요.</p></div>
+      <div class="feature"><h3>TV 화면에 크게</h3><p>전체 화면 버튼으로 칠판 옆 TV에 띄워 함께 볼 수 있어요.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>사용 방법</h2>
+    <ol class="steps">
+      <li><div><b>명단 입력</b><span>오른쪽 칸에 한 줄에 한 명씩, 또는 쉼표로 구분해 이름을 넣어요.</span></div></li>
+      <li><div><b>룰렛 돌리기</b><span>돌리기 버튼, 가운데 GO!, 또는 <kbd>Space</kbd> 키를 눌러요.</span></div></li>
+      <li><div><b>발표자 확인</b><span>룰렛이 멈추면 뽑힌 친구 이름이 크게 나타나요.</span></div></li>
+      <li><div><b>새로 시작</b><span>모두 발표했으면 순서 초기화를 눌러 처음부터 다시 돌려요.</span></div></li>
+    </ol>
+  </section>
+
+  <footer>index.html과 roulette.html을 같은 폴더에 두고 사용하세요.</footer>
+</div>
+</body>
+</html>
